@@ -27,7 +27,15 @@ final class Plugin {
         register_activation_hook(GRW_PLUGIN_FILE, array($this, 'activate'));
         register_deactivation_hook(GRW_PLUGIN_FILE, array($this, 'deactivate'));
 
+        add_action('admin_init', array($this, 'admin_init'));
         add_action('plugins_loaded', array($this, 'register_services'));
+    }
+
+    public function admin_init() {
+        if (get_option('grw_do_activation', false)) {
+            delete_option('grw_do_activation');
+            wp_safe_redirect(admin_url('admin.php?page=grw'));
+        }
     }
 
     public function register_services() {
@@ -38,8 +46,6 @@ final class Plugin {
         $activator = new Activator($database);
         $activator->register();
 
-        $debug_info = new Debug_Info($activator);
-
         $assets = new Assets(GRW_ASSETS_URL, $this->version, get_option('grw_debug_mode') == '1');
         $assets->register();
 
@@ -47,6 +53,8 @@ final class Plugin {
         $post_types->register();
 
         $feed_deserializer = new Feed_Deserializer(new \WP_Query());
+
+        $debug_info = new Debug_Info($activator, $feed_deserializer);
 
         $feed_page = new Feed_Page($feed_deserializer);
         $feed_page->register();
@@ -76,7 +84,7 @@ final class Plugin {
 
         if (is_admin()) {
             $feed_serializer = new Feed_Serializer();
-            $feed_serializer_ajax = new Feed_Serializer_Ajax($feed_deserializer, $core, $view);
+            $feed_serializer_ajax = new Feed_Serializer_Ajax($feed_serializer, $feed_deserializer, $core, $view);
 
             $admin_notice = new Admin_Notice();
             $admin_notice->register();
@@ -89,6 +97,10 @@ final class Plugin {
 
             $admin_feed_columns = new Admin_Feed_Columns($feed_deserializer);
             $admin_feed_columns->register();
+
+            $plugin_overview_ajax = new Plugin_Overview_Ajax($core);
+            $plugin_overview = new Plugin_Overview();
+            $plugin_overview->register();
 
             $settings_save = new Settings_Save($activator);
             $settings_save->register();
@@ -113,6 +125,8 @@ final class Plugin {
         update_option('grw_activation_time', $now);
 
         add_option('grw_is_multisite', $network_wide);
+
+        add_option('grw_do_activation', true);
 
         $activator = new Activator(new Database());
         $activator->activate();

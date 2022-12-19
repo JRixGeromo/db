@@ -22,6 +22,8 @@ class Activator {
             'grw_debug_refresh',
             'grw_auth_code',
             'grw_debug_mode',
+            'grw_feed_ids',
+            'grw_do_activation',
         );
     }
 

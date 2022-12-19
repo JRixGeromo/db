@@ -9,17 +9,18 @@ class Assets {
     private $debug;
 
     private static $css_assets = array(
-        'grw-admin-main-css'   => 'css/admin-main',
-        'grw-public-clean-css' => 'css/public-clean',
-        'grw-public-main-css'  => 'css/public-main',
+        'grw-admin-main-css'      => 'css/admin-main',
+        'grw-public-clean-css'    => 'css/public-clean',
+        'grw-public-main-css'     => 'css/public-main',
     );
 
     private static $js_assets = array(
-        'grw-admin-main-js'    => 'js/admin-main',
-        'grw-admin-builder-js' => 'js/admin-builder',
-        'grw-public-time-js'   => 'js/public-time',
-        'grw-public-blazy-js'  => 'js/public-blazy.min',
-        'grw-public-main-js'   => 'js/public-main',
+        'grw-admin-main-js'       => 'js/admin-main',
+        'grw-admin-builder-js'    => 'js/admin-builder',
+        'grw-admin-apexcharts-js' => 'js/admin-apexcharts',
+        'grw-public-time-js'      => 'js/public-time',
+        'grw-public-blazy-js'     => 'js/public-blazy.min',
+        'grw-public-main-js'      => 'js/public-main',
     );
 
     public function __construct($url, $version, $debug) {
@@ -69,7 +70,7 @@ class Assets {
     }
 
     public function register_scripts() {
-        $scripts = array('grw-admin-main-js', 'grw-public-main-js');
+        $scripts = array('grw-admin-main-js', 'grw-public-main-js', 'grw-admin-apexcharts-js');
         if ($this->debug) {
             array_push($scripts, 'grw-admin-builder-js');
             array_push($scripts, 'grw-public-time-js');
@@ -93,10 +94,9 @@ class Assets {
         wp_enqueue_script('jquery-ui-dialog');
 
         $vars = array(
-            'googleAPIKey'  => get_option('grw_google_api_key'),
-            'GOOGLE_AVATAR' => GRW_GOOGLE_AVATAR,
             'handlerUrl'    => admin_url('options-general.php?page=grw'),
             'supportUrl'    => admin_url('admin.php?page=grw-support'),
+            'builderUrl'    => admin_url('admin.php?page=grw-builder'),
             'actionPrefix'  => 'grw',
             'wordpress'     => true,
         );

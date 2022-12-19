@@ -39,7 +39,12 @@ class Admin_Tophead {
                     <img src="<?php esc_attr_e(GRW_ASSETS_URL . 'img/logo.png') ?>" alt="logo">
                     Google Reviews
                 </div>
-                <span class="grw-version">Free Version: <?php echo GRW_VERSION; ?></span>
+                <div class="grw-version">
+                    <div class="grw-version-free">Free Version: <?php echo GRW_VERSION; ?></div>
+                    <div class="grw-version-upgrade">
+                        <a href="https://richplugins.com/business-reviews-bundle-wordpress-plugin" target="_blank">Upgrade to business</a>
+                    </div>
+                </div>
             </div>
             <?php
         }

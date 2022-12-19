@@ -120,7 +120,7 @@ function _grw_init_slider(el) {
 
     var init = function() {
         if (isVisible(SLIDER_ELEM)) {
-            resize();
+            setTimeout(resize, 1);
             _rplg_init_blazy(10);
             if (REVIEW_ELEMS.length) {
                 setTimeout(swipe, 300);

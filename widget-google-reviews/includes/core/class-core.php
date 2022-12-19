@@ -16,6 +16,7 @@ class Core {
             'hide_based_on'             => false,
             'hide_writereview'          => false,
             'hide_reviews'              => false,
+            'hide_avatar'               => false,
 
             'slider_hide_border'        => false,
             'slider_hide_prevnext'      => false,
@@ -274,7 +275,89 @@ class Core {
         return array('business' => $business, 'reviews' => $google_reviews);
     }
 
-    private function merge_biz($businesses, $id = '', $name = '', $url = '', $photo = '', $provider = '') {
+    public function get_overview($place_id = 0) {
+        global $wpdb;
+
+        // -------------- Get Google place --------------
+        $place_sql = "SELECT id, place_id, name, rating, review_count, updated" .
+                     " FROM " . $wpdb->prefix . Database::BUSINESS_TABLE .
+                     " WHERE rating > 0 AND review_count > 0" . ($place_id > 0 ? ' AND id = %d' : '') .
+                     " ORDER BY id DESC";
+
+        $places = $place_id > 0 ?
+                  $wpdb->get_results($wpdb->prepare($place_sql, sanitize_text_field(wp_unslash($place_id)))) :
+                  $wpdb->get_results($wpdb->prepare($place_sql));
+
+        $rating = 0;
+        $review_count = 0;
+        $count = count($places);
+        $google_places = array();
+        $google_place_ids = array();
+
+        foreach ($places as $place) {
+            $id = $place->id;
+            $name = $place->name;
+            $rating += $place->rating;
+            $review_count += $place->review_count;
+
+            array_push($google_place_ids, $place->id);
+            array_push($google_places, json_decode(json_encode(array('id' => $place->id, 'name' => $place->name, 'updated' => $place->updated))));
+        }
+
+        if ($count > 1) {
+            $rating = round($rating / $count, 1);
+            $rating = number_format((float)$rating, 1, '.', '');
+            array_unshift($google_places, json_decode(json_encode(array('id' => 0, 'name' => 'Summary by all places'))));
+        }
+
+        // -------------- Get Google reviews --------------
+        $google_reviews = array();
+
+        $reviews = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM " . $wpdb->prefix . Database::REVIEW_TABLE .
+                " WHERE google_place_id IN (" . implode(', ', array_fill(0, count($google_place_ids), '%d')) . ")" .
+                " ORDER BY time DESC LIMIT 10",
+                $google_place_ids
+            )
+        );
+
+        foreach ($reviews as $rev) {
+            $review = json_decode(json_encode(
+                array(
+                    'id'            => $rev->id,
+                    'hide'          => $rev->hide,
+                    'rating'        => $rev->rating,
+                    'text'          => wp_encode_emoji($rev->text),
+                    'author_url'    => $rev->author_url,
+                    'author_name'   => $rev->author_name,
+                    'time'          => $rev->time,
+                )
+            ));
+            array_push($google_reviews, $review);
+        }
+
+        // -------------- Get Google stats --------------
+        $stats = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM " . $wpdb->prefix . Database::STATS_TABLE .
+                " WHERE google_place_id IN (" . implode(', ', array_fill(0, count($google_place_ids), '%d')) . ")" .
+                " ORDER BY id DESC LIMIT 10000",
+                $google_place_ids
+            )
+        );
+
+        return
+            array(
+                'rating'       => $rating,
+                'review_count' => $review_count,
+                'places'       => $google_places,
+                'reviews'      => $google_reviews,
+                'stats'        => $stats
+            );
+    }
+
+    public function merge_biz($businesses, $id = '', $name = '', $url = '', $photo = '', $provider = '') {
         $count = 0;
         $rating = 0;
         $review_count = array();

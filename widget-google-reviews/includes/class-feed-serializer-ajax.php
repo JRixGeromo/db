@@ -6,7 +6,8 @@ use WP_Rplg_Google_Reviews\Includes\Core\Core;
 
 class Feed_Serializer_Ajax {
 
-    public function __construct(Feed_Deserializer $feed_deserializer, Core $core, View $view) {
+    public function __construct(Feed_Serializer $feed_serializer, Feed_Deserializer $feed_deserializer, Core $core, View $view) {
+        $this->feed_serializer = $feed_serializer;
         $this->feed_deserializer = $feed_deserializer;
         $this->core = $core;
         $this->view = $view;
@@ -16,13 +17,7 @@ class Feed_Serializer_Ajax {
 
     public function save_ajax() {
 
-        $post_id = wp_insert_post(array(
-            'ID'           => $_POST['post_id'],
-            'post_title'   => $_POST['title'],
-            'post_content' => $_POST['content'],
-            'post_type'    => Post_Types::FEED_POST_TYPE,
-            'post_status'  => 'publish',
-        ));
+        $post_id = $this->feed_serializer->save($_POST['post_id'], $_POST['title'], $_POST['content']);
 
         if (isset($post_id)) {
             $feed = $this->feed_deserializer->get_feed($post_id);

@@ -3,8 +3,8 @@ Contributors: richplugins
 Donate link: https://richplugins.com/business-reviews-bundle-wordpress-plugin
 Tags: google reviews, google, reviews, rating, widget, reviews plugin, google business, testimonial, testimonials, google places reviews, map reviews, google my business
 Requires at least: 2.8
-Tested up to: 6.0
-Stable tag: 2.2.1
+Tested up to: 6.1
+Stable tag: 2.2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -97,6 +97,21 @@ To find out more about who we are and what we do, here are some useful links:
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 2.2.4 =
+* Bugfix related with the previous release
+
+= 2.2.3 =
+* Security: check admin role in widget create function
+* Improve: initial Google reviews connection
+* Improve: redirect to a widget builder page after plugin's activation
+* Some language fixes
+
+= 2.2.2 =
+* New Overiew page
+* Bugfix: slider lite resize
+* Some translation fixes
+* Update to WP 6.1
 
 = 2.2.1 =
 * Bugfix: Undefined property $hide_writereview

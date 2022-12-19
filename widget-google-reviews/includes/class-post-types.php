@@ -8,6 +8,9 @@ class Post_Types {
 
     public function register() {
         add_action('init', array($this, 'register_post_types'));
+
+        add_action('trash_' . self::FEED_POST_TYPE, array($this, 'trash'), 10, 2);
+        add_action('publish_' . self::FEED_POST_TYPE, array($this, 'publish'), 10, 2);
     }
 
     public function register_post_types() {
@@ -66,5 +69,25 @@ class Post_Types {
         );
 
         register_post_type(self::FEED_POST_TYPE, $args);
+    }
+
+    public function trash($ID) {
+        $feed_ids = get_option('grw_feed_ids');
+        if (!empty($feed_ids)) {
+            $ids = explode(",", $feed_ids);
+            if (in_array($ID, $ids)) {
+                $ids = array_diff($ids, [$ID]);
+                update_option('grw_feed_ids', implode(",", $ids));
+            }
+        }
+    }
+
+    public function publish($ID) {
+        $feed_ids = get_option('grw_feed_ids');
+        $ids = empty($feed_ids) ? array($ID) : explode(",", $feed_ids);
+        if (!in_array($ID, $ids)) {
+            array_push($ids, $ID);
+        }
+        update_option('grw_feed_ids', implode(",", $ids));
     }
 }

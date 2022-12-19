@@ -6,8 +6,9 @@ use WP_Rplg_Google_Reviews\Includes\Core\Database;
 
 class Debug_Info {
 
-    public function __construct(Activator $activator) {
+    public function __construct(Activator $activator, Feed_Deserializer $feed_deserializer) {
         $this->activator = $activator;
+        $this->feed_deserializer = $feed_deserializer;
     }
 
     public function render() {
@@ -62,14 +63,7 @@ foreach (get_plugins() as $key => $plugin) {
 ------------ Feeds ------------
 
 <?php
-$wp_query = new \WP_Query();
-$wp_query->query(array(
-    'post_type'      => Post_Types::FEED_POST_TYPE,
-    'fields'         => array('ID', 'post_title', 'post_content'),
-    'posts_per_page' => 300,
-    'no_found_rows'  => true,
-));
-$feeds = $wp_query->posts;
+$feeds = $this->feed_deserializer->get_all_feeds();
 foreach ($feeds as $feed) {
     echo $feed->ID . " " . $feed->post_title . ": " . $feed->post_content . "\r\n\r\n";
 }

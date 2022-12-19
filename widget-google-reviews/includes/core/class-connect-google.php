@@ -92,9 +92,23 @@ class Connect_Google {
                                     " WHERE id = %d", $_POST['id']
                                 )
                             );
+
                             $hide = $review->hide == '' ? 'y' : '';
                             $wpdb->update($wpdb->prefix . Database::REVIEW_TABLE, array('hide' => $hide), array('id' => $_POST['id']));
-                            delete_transient('grw_feed_' . GRW_VERSION . '_' . $_POST['feed_id'] . '_reviews', false);
+
+                            // Cache clear
+                            if ($_POST['feed_id']) {
+                                delete_transient('grw_feed_' . GRW_VERSION . '_' . $_POST['feed_id'] . '_reviews', false);
+                            } else {
+                                $feed_ids = get_option('grw_feed_ids');
+                                if (!empty($feed_ids)) {
+                                    $ids = explode(",", $feed_ids);
+                                    foreach ($ids as $id) {
+                                        delete_transient('grw_feed_' . GRW_VERSION . '_' . $id . '_reviews', false);
+                                    }
+                                }
+                            }
+
                             $response = array('hide' => $hide);
                         }
                         header('Content-type: text/javascript');
@@ -203,7 +217,8 @@ class Connect_Google {
                 'rating'       => $place_rating,
                 'url'          => isset($place->url)     ? $place->url     : null,
                 'website'      => isset($place->website) ? $place->website : null,
-                'review_count' => $review_count
+                'review_count' => $review_count,
+                'updated'      => round(microtime(true) * 1000)
             ));
             $google_place_id = $wpdb->insert_id;
 

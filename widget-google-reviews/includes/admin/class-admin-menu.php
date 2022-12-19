@@ -10,7 +10,7 @@ class Admin_Menu {
     }
 
     public function register() {
-        add_action('admin_menu', array($this, 'add_page'));
+        add_action('admin_menu', array($this, 'add_page'), 9);
         add_action('admin_menu', array($this, 'add_subpages'));
         add_filter('submenu_file', array($this, 'remove_submenu_pages'));
         add_filter('admin_body_class', array($this, 'add_admin_body_class'));
@@ -26,6 +26,15 @@ class Admin_Menu {
             GRW_ASSETS_URL . 'img/menu_icon.png',
             25
         );
+
+        $overview_page = new Admin_Page(
+            'grw',
+            'Overview',
+            'Overview',
+            'edit_posts',
+            'grw'
+        );
+        $overview_page->add_page();
     }
 
     public function add_subpages() {
@@ -47,14 +56,14 @@ class Admin_Menu {
         );
         $setting_page->add_page();
 
-        $setting_page = new Admin_Page(
+        $support_page = new Admin_Page(
             'grw',
             'Support',
             'Support',
             'manage_options',
             'grw-support'
         );
-        $setting_page->add_page();
+        $support_page->add_page();
     }
 
     public function remove_submenu_pages($submenu_file) {

@@ -37,10 +37,10 @@ class Admin_Rev {
                 $url_later = esc_url(add_query_arg('grw_rev_notice', 'later', $url));
                 $url_never = esc_url(add_query_arg('grw_rev_notice', 'never', $url));
 
-                $notice = '<p style="font-weight:normal;">' .
-                              'Hey, I am happy to see that you\'ve been using our <b>Google Reviews Widget</b> plugin for a while now – that’s awesome!<br>' .
-                              'Could you please do me a BIG favor and give it a 5-star rating on WordPress?<br><br>' .
-                              '-- Thanks! Daniel K.' .
+                $notice = '<p style="font-weight:normal;font-size:15px;">' .
+                              'Hey, I am happy to see that you\'ve been using <b>Plugin for Google Reviews</b> for a while now – that’s awesome!<br>' .
+                              'Could you tell about your site and experience with the plugin in <a href="https://wordpress.org/support/plugin/widget-google-reviews/reviews/#new-post" style="color:#ffb900;line-height:90%;font-size:1.5em;letter-spacing:0.03em;position:relative;top:0.08em;text-decoration:none;" target="_blank">★★★★★</a> WordPress review?<br><br>' .
+                              '--<br>Thanks!<br>Daniel K. founder of RichPlugins Ltd' .
                           '</p>' .
                           '<p>' .
                               '<a href="https://wordpress.org/support/plugin/widget-google-reviews/reviews/#new-post" style="text-decoration:none;" target="_blank">' .

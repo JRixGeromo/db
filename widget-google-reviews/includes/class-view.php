@@ -201,13 +201,7 @@ class View {
                 <?php $place_name_content = '<span>' . $place->name . '</span>';
                 echo $this->grw_anchor($place->url, '', $place_name_content, $options->open_link, $options->nofollow_link); ?>
             </div>
-            <div>
-                <span class="wp-google-rating"><?php echo $rating; ?></span>
-                <span class="wp-google-stars"><?php $this->grw_stars($rating); ?></span>
-            </div>
-            <?php if (!$options->hide_based_on && isset($place->review_count)) { ?>
-            <div class="wp-google-powered"><?php echo vsprintf(__('Based on %s reviews', 'widget-google-reviews'), $this->grw_array($place->review_count)); ?></div>
-            <?php } ?>
+            <?php $this->grw_place_rating($rating, $place->review_count, $options->hide_based_on); ?>
 
             <?php if ($show_powered) { ?>
             <div class="wp-google-powered">
@@ -222,6 +216,17 @@ class View {
             <?php } ?>
         </div>
         <?php
+    }
+
+    function grw_place_rating($rating, $review_count, $hide_based_on) {
+        ?>
+        <div>
+            <span class="wp-google-rating"><?php echo $rating; ?></span>
+            <span class="wp-google-stars"><?php $this->grw_stars($rating); ?></span>
+        </div>
+        <?php if (!$hide_based_on && isset($review_count)) { ?>
+        <div class="wp-google-powered"><?php echo vsprintf(__('Based on %s reviews', 'widget-google-reviews'), $this->grw_array($review_count)); ?></div>
+        <?php }
     }
 
     function grw_place_reviews($reviews, $options, $is_admin = false) {
@@ -242,15 +247,7 @@ class View {
                 if ($options->pagination > 0 && $options->pagination <= $i++) {
                     $hr = true;
                 }
-                $this->grw_place_review(
-                    $review, $hr,
-                    $options->text_size,
-                    $options->reviewer_avatar_size,
-                    $options->open_link,
-                    $options->nofollow_link,
-                    $options->lazy_load_img,
-                    $is_admin
-                );
+                $this->grw_place_review($review, $hr, $options, $is_admin);
             }
         }
         ?>
@@ -266,28 +263,30 @@ class View {
         }
     }
 
-    function grw_place_review($review, $hr, $text_size, $reviewer_avatar_size, $open_link, $nofollow_link, $lazy_load_img, $is_admin = false) {
+    function grw_place_review($review, $hr, $options, $is_admin = false) {
         ?>
         <div class="wp-google-review<?php if ($hr) { echo ' wp-google-hide'; } if ($is_admin && $review->hide != '') { echo ' wp-review-hidden'; } ?>">
+            <?php if (!$options->hide_avatar) { ?>
             <div class="wp-google-left">
                 <?php
-                $default_avatar = GRW_GOOGLE_AVATAR;
+                $default_avatar = GRW_ASSETS_URL . 'img/guest.png';
                 if (strlen($review->author_avatar) > 0) {
                     $author_avatar = $review->author_avatar;
                 } else {
                     $author_avatar = $default_avatar;
                 }
-                if (isset($reviewer_avatar_size)) {
-                    $author_avatar = str_replace('s128', 's' . $reviewer_avatar_size, $author_avatar);
-                    $default_avatar = str_replace('s128', 's' . $reviewer_avatar_size, $default_avatar);
+                if (isset($options->reviewer_avatar_size)) {
+                    $author_avatar = str_replace('s128', 's' . $options->reviewer_avatar_size, $author_avatar);
+                    $default_avatar = str_replace('s128', 's' . $options->reviewer_avatar_size, $default_avatar);
                 }
-                $this->grw_image($author_avatar, $review->author_name, $lazy_load_img, $default_avatar);
+                $this->grw_image($author_avatar, $review->author_name, $options->lazy_load_img, $default_avatar);
                 ?>
             </div>
+            <?php } ?>
             <div class="wp-google-right">
                 <?php
                 if (strlen($review->author_url) > 0) {
-                    $this->grw_anchor($review->author_url, 'wp-google-name', $review->author_name, $open_link, $nofollow_link);
+                    $this->grw_anchor($review->author_url, 'wp-google-name', $review->author_name, $options->open_link, $options->nofollow_link);
                 } else {
                     if (strlen($review->author_name) > 0) {
                         $author_name = $review->author_name;
@@ -300,7 +299,7 @@ class View {
                 <div class="wp-google-time" data-time="<?php echo $review->time; ?>"><?php echo gmdate("H:i d M y", $review->time); ?></div>
                 <div class="wp-google-feedback">
                     <span class="wp-google-stars"><?php echo $this->grw_stars($review->rating); ?></span>
-                    <span class="wp-google-text"><?php echo $this->grw_trim_text($review->text, $text_size); ?></span>
+                    <span class="wp-google-text"><?php echo $this->grw_trim_text($review->text, $options->text_size); ?></span>
                 </div>
                 <?php if ($is_admin) {
                     echo '<a href="#" class="wp-review-hide" data-id=' . $review->id . '>' . ($review->hide == '' ? 'Hide' : 'Show') . ' review</a>';
@@ -316,7 +315,7 @@ class View {
             <div class="wp-google-left">
                 <?php
                 // Google reviewer avatar
-                $default_avatar = GRW_GOOGLE_AVATAR;
+                $default_avatar = GRW_ASSETS_URL . 'img/guest.png';
                 if (strlen($review->author_avatar) > 0) {
                     $author_avatar = $review->author_avatar;
                 } else {
@@ -380,7 +379,7 @@ class View {
         ?><img <?php if ($lazy) { ?>src="<?php echo $def_ava; ?>" data-<?php } ?>src="<?php echo $src; ?>" class="rplg-review-avatar<?php if ($lazy) { ?> rplg-blazy<?php } ?>" alt="<?php echo $alt; ?>" width="50" height="50" title="<?php echo $alt; ?>" onerror="if(this.src!='<?php echo $def_ava; ?>')this.src='<?php echo $def_ava; ?>';" <?php echo $atts; ?>><?php
     }
 
-    private function js_loader($func, $data = '') {
+    function js_loader($func, $data = '') {
         ?><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="js_loader" onload="(function(el, data) {var f = function() { window.<?php echo $func; ?> ? <?php echo $func; ?>(el, data) : setTimeout(f, 400) }; f() })(this<?php if (strlen($data) > 0) { ?>, <?php echo str_replace('"', '\'', $data); } ?>);" width="1" height="1" style="display:none"><?php
     }
 

@@ -71,13 +71,6 @@ var GRW_HTML_CONTENT = '' +
                     '<option value="zh-Hant">Chinese (Traditional)</option>' +
                 '</select>' +
             '</div>' +
-            /*'<div class="grw-builder-option">' +
-                '<input type="text" class="grw-connect-key" value="' + GRW_VARS.googleAPIKey + '" placeholder="Google Places API Key" />' +
-                '<span class="grw-quest grw-toggle" title="Click to help">?</span>' +
-                '<div class="grw-quest-help">' +
-                    'Except a Place ID you should also create your own Google API key, it\'s very simple and won\'t take more than a few minutes, please <a href="' + GRW_VARS.supportUrl + '&grw_tab=fig#fig_api_key" target="_blank">read this manual</a>.' +
-                '</div>' +
-            '</div>' +*/
             '<div class="grw-builder-option">' +
                 '<button class="grw-connect-btn">Connect Google</button>' +
                 '<small class="grw-connect-error"></small>' +
@@ -260,13 +253,18 @@ function grw_builder_init($, data) {
 
     el.innerHTML = GRW_HTML_CONTENT;
 
+    var connect_google_el = el.querySelector('.grw-connect-google-inside'),
+        google_pid_el = el.querySelector('.grw-connect-id');
+
     if (data.conns) {
         grw_deserialize_connections($, el, data.conns, data.opts);
+    } else {
+        connect_google_el.style = '';
+        google_pid_el.focus();
     }
 
     // Google Connect
-    var platform_google_el = el.querySelector('.grw-connect-google-inside');
-    grw_connection($, platform_google_el, 'google', data.authcode);
+    grw_connection($, connect_google_el, 'google', data.authcode);
 
     $('.grw-connect-options input[type="text"],.grw-connect-options textarea').keyup(function() {
         grw_serialize_connections();
@@ -278,6 +276,10 @@ function grw_builder_init($, data) {
     $('.grw-toggle', el).unbind('click').click(function () {
         $(this).toggleClass('toggled');
         $(this).next().slideToggle();
+    });
+
+    $('.grw-toggle.grw-connect-google').click(function () {
+        google_pid_el.focus();
     });
 
     if ($('.grw-connections').sortable) {
@@ -311,10 +313,11 @@ function grw_feed_save_ajax($) {
 
     jQuery.post(ajaxurl, {
 
-        post_id : window.grw_post_id.value,
-        title   : window.grw_title.value,
-        content : document.getElementById('grw-builder-connection').value,
-        action  : 'grw_feed_save_ajax'
+        post_id   : window.grw_post_id.value,
+        title     : window.grw_title.value,
+        content   : document.getElementById('grw-builder-connection').value,
+        action    : 'grw_feed_save_ajax',
+        grw_nonce : jQuery('#grw_nonce').val()
 
     }, function(res) {
 

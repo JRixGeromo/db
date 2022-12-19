@@ -26,6 +26,24 @@ class Feed_Deserializer {
         return $this->wp_query->posts[0];
     }
 
+    public function get_all_feeds($args = array()) {
+        $default_args = array(
+            'post_type'      => Post_Types::FEED_POST_TYPE,
+            'fields'         => array('ID', 'post_title', 'post_content'),
+            'posts_per_page' => 300,
+            'no_found_rows'  => true,
+        );
+
+        $args = wp_parse_args($args, $default_args);
+        $this->wp_query->query($args);
+
+        if (!$this->wp_query->have_posts()) {
+            return false;
+        }
+
+        return $this->wp_query->posts;
+    }
+
     public function get_feed_count($args = array()) {
         $default_args = array(
             'post_type'      => Post_Types::FEED_POST_TYPE,
